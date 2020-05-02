@@ -26,4 +26,8 @@ public class PostWildTeleportEvent extends Event {
     public static HandlerList getHandlerList() {
         return panHandlers;
     }
+    
+    public Player getPlayer() {
+        return wildLing;
+    }
 }
