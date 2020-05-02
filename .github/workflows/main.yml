@@ -19,3 +19,22 @@ jobs:
           owner: AcmeProject
           base: master
           head: master
+  build:
+
+    runs-on: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up JDK 1.8
+      uses: giltene/setup-java@master
+      with:
+        java-version: 1.8
+    - name: Build with Maven
+      run: mvn clean package --file pom.xml
+      
+    - run: mkdir -p path/to/artifact
+    - run: cat "./target/WildTP.jar" > path/to/artifact/WildTP.jar
+    - uses: actions/upload-artifact@master
+      with:
+        name: WildernessTp
+        path: path/to/artifact
