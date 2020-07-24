@@ -32,9 +32,6 @@ public class CommandsGoneWild implements CommandExecutor, TabCompleter {
         if (sender instanceof Player && TooCool2Teleport.isCold((Player) sender)) {
             err = TooWildForEnums.PENDING_RTP;
         }
-        else if (sender instanceof Player && ((Player) sender).getFallDistance() > 0) {
-            err = TooWildForEnums.FALLNOCMD;
-        }
         else if (args.length == 0) {
             if (sender.hasPermission("wild.wildtp")) {
                 if (sender instanceof Player) {
@@ -93,9 +90,14 @@ public class CommandsGoneWild implements CommandExecutor, TabCompleter {
             World w = Bukkit.getWorld(args[0]);
 
             if (w != null) {
-                if (sender.hasPermission("wild.wildtp.world") // @formatter:off
+                if (sender.hasPermission("wild.wildtp.world")
                 && (sender.hasPermission("wild.wildtp.world.*") || sender.hasPermission("wild.wildtp.world." + args[0]))) {
-                    if (sender instanceof Player) { // @formatter:on
+                    if (sender instanceof Player)
+                    {
+                        WildTP.debug("wild.wildtp.world: " + sender.hasPermission("wild.wildtp.world"));
+                        WildTP.debug("wild.wildtp.world.*: " + sender.hasPermission("wild.wildtp.world.*"));
+                        WildTP.debug("wild.wildtp.world." + args[0] + ": " + sender.hasPermission("wild.wildtp.world." + args[0]));
+
                         Player p = (Player) sender;
 
                         new TeleportGoneWild(Trigger.COMMAND, p, w).WildTeleport();

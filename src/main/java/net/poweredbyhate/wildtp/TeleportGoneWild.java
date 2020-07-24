@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -37,6 +38,7 @@ public class TeleportGoneWild {
     private PotionEffect[] queen;
     private World          whr;
     private WorldConfig    wc;
+    private int retries;
 
     static enum Direction {
         EAST, NORTH, SOUTH, WEST
@@ -182,7 +184,11 @@ public class TeleportGoneWild {
                         String m = TooWildForEnums.COOLDOWN.replace("%TIME%", shaker.getTimeLeft(who));
                         if (WildTP.ab) who.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(m)); else who.sendMessage(m);
                     }
-                    else getRandomeLocation();
+                    else
+                    {
+                        retries = wc.retries;
+                        getRandomeLocation();
+                    }
                 }
                 bangbang(ginaWilde);
             }
@@ -216,12 +222,14 @@ public class TeleportGoneWild {
 
         if (wc.wamuppah < 1 || bypass("delay")) goWild(loc);
         else {
-            WildTP.debug("Player needs to wait more");
+            WildTP.debug("Player needs to wait more: " + wc.wamuppah * 20);
 
             TooCool2Teleport.addPlayer(who, boo, queen, new BukkitRunnable() {
                 @Override
                 public void run() {
-                    if (!isCancelled()) goWild(loc);
+                    WildTP.debug("isCancelled: " + isCancelled());
+                    if (!isCancelled())
+                        goWild(loc);
                 }
             }.runTaskLater(instace, wc.wamuppah * 20));
 
@@ -245,54 +253,63 @@ public class TeleportGoneWild {
                 continue;
             }
 
-            totalChance += randomeWorlds.getInt(worldString);
+            int chance = randomeWorlds.getInt(worldString);
+            if (chance < 1) //fixes bug where setting as 0 overwrites previous entry
+                continue;
+
+            totalChance += chance;
             hesDaMap.put(totalChance, vote4Pedro);
         }
 
-        int daChosenOne = RandomLocationSearchTask.r4nd0m(totalChance, 0);
+        int daChosenOne = WhatAreYouDoingInMySwamp.r4nd0m(totalChance, 0);
 
-        for (Integer blah : hesDaMap.keySet()) if (blah >= daChosenOne) return hesDaMap.get(blah);
+        for (Integer blah : hesDaMap.keySet())
+            if (blah >= daChosenOne)
+                return hesDaMap.get(blah);
         return null;
     }
 
     private void getRandomeLocation() {
-        TooCool2Teleport.addPlayer(who, boo, queen,
-                Bukkit.getScheduler().runTaskAsynchronously(instace, new Runnable() {
-                    @Override
-                    public void run() {
-                        try { // Start searching random task
-                            FutureTask<Location> futureTask = new RandomLocationSearchTask(who, wc).search(way);
-                            // Wait and get the random location
-                            Location loco = futureTask.get();
+        TooCool2Teleport.addPlayer(who, boo, queen, null);
+        if (retries-- < 0)
+        {
+            WildTP.debug("No suitable locations found");
+            who.sendMessage(TooWildForEnums.NO_LOCATION);
+            TooCool2Teleport.microwave(who);
+            return;
+        }
 
-                            if (loco == null) WildTP.debug("No suitable locations found");
-                            // Teleport player in main thread
-                            else if (Bukkit.getScheduler().callSyncMethod(instace, new Callable<Boolean>() {
-                                @Override
-                                public Boolean call() throws Exception {
-                                    return realTeleportt2(loco);
-                                }
-                            }).get()) return;
-                            else WildTP.debug("Random location searching timeout");
-                        }
-                        catch (InterruptedException | ExecutionException e) {
-                            TooCool2Teleport.microwave(who);
-                            e.printStackTrace();
-                            return;
-                        }
+        if (!TooCool2Teleport.isCold(who))
+        {
+            WildTP.debug(who + " is cold");
+            return;
+        }
 
-                        TooCool2Teleport.microwave(who);
-                        who.sendMessage(TooWildForEnums.NO_LOCATION);
-                    }
-                }));
+        TeleportGoneWild.focus(who, wc, retries);
+
+        new WhatAreYouDoingInMySwamp(who, wc, way).search().thenAccept(location ->
+        {
+            Location loco = location;
+            if (loco != null)
+                realTeleportt2(loco);
+            else
+            {
+                WildTP.debug("unsuitable location, trying again.");
+                getRandomeLocation();
+            }
+        });
     }
 
     private void goWild(Location loc) {
-        if (!TooCool2Teleport.microwave(who)) return;
+        if (!TooCool2Teleport.microwave(who))
+        {
+            WildTP.debug("unmicrowaved leftovers.");
+            return;
+        }
 
         WildTP.debug("Teleporting " + who.getName() + loc);
 
-        if (RandomLocationSearchTask.bonelessIceScream(loc)) {
+        if (WhatAreYouDoingInMySwamp.bonelessIceScream(loc)) {
             if (wc.whoYaGonaCall) {
                 WildTP.debug("Here come the §cfiremen§r!");
                 Block block = loc.getBlock(); block.setType(Material.AIR);

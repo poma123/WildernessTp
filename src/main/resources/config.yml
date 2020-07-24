@@ -34,12 +34,6 @@ cooldownMsgUsesActionBar: true
 # dere, configurable
 enableGUI: true
 
-# this won't have big impact on performances, but if you are not using this "feature",
-# it's a good idea to disable, because its listener is triggered each time you click in
-# an inventory. It checks first if this inventory is its one, and stop quickly
-# so not a big deal to let it enabled. But as MC becomes heavier and heavier,
-# saving resources even if small can be essential for servers which hardly keep their TPS.
-
 # If true, a bossbar will be displayed to the player while waiting for the RTP proceed
 enableBar: true
 barColor:
@@ -86,10 +80,11 @@ BlockedBlocks: # Use « [] » if you don't want to restrict
   - CAVE_AIR
 
 Portals:
-  # Gamemode NOT listed here will ignore portals
-  Gamemodes: # (must be useful to disable CREATIVE if you build your spawn for example)
+  # Gamemode NOT listed here will ignore portals (e.g., remove CREATIVE if you don't want to be teleported when in a portal while in creative mode)
+  Gamemodes:
     - ADVENTURE
     - SURVIVAL
+    - CREATIVE
   # If true, a player enterring a portal is frozen until it's done
   freezeWhileRTP: false
   # If true, if you enter a portal and move, this will cancel the RTP
@@ -151,16 +146,16 @@ MaxXY: 5000
 # If true, border is recalculated each RTP - useful if you set your border to grow/shrink (so you should keep it false if not required)
 movingBorder: false
 
-Wait: 5      # (seconds) Time the player have to wait between he type the command and tp be sent in wild
+Wait: 0      # (seconds) Time the player have to wait between he type the command and tp be sent in wild
 Retries: 6   # Max attempts the plugin will try to find a safe place to tp the player
-Cooldown: 60 # (seconds) Time to wait before player can re-do again
+Cooldown: 0 # (seconds) Time to wait before player can re-do again
 
 Cost: 0 # Money cost of a RTP (requires Vault)
 paidTPconfirmation: 30 # If the RTP has a cost, a confirmation will be asked to the player...
 # This is (in second) the time this pending RTP stay valid. (set to 0 if you don't want confirmations) 
 
 teleportNewPlayers: false  # Choose "true" if you are not proud of your spawn
-dropPlayerFromAbove: false # Choose "true" if you vocal on dumcord and want to hear them scream
+dropPlayerFromAbove: false # Choose "true" if you vocal on dumcord and want to hear them scream. Or as I originally intended this to be, a dropship-like teleport
 dropPlayerFromHeight: 255  # Height from where the player is dropped (if dropPlayerFromAbove is true)
 # /!\ Using too high values can cause issues in some cases... Test before letting your players use them.
 # For example, using 300 with datapack "EndAboveOverworld" load the end, then reload overworld...
@@ -179,10 +174,10 @@ PostCommands: # Ignored if DoCommands is false
 useRandomWorlds: false
 randomWorlds: # Ignored if useRandomWorlds is false
   world: 1337
-  world_nether: 42 # Don't ask... (or wait a few millions years) 
+  world_nether: 42
 
 useGlobalClaimCheck: true # (if GriefPrevention plugin is found, default value will be false)
-useAlternativeGlobalClaimCheck: false
+useAlternativeGlobalClaimCheck: false # If you see errors like "Could not pass BlockBreakEvent..." then enable this instead of the global claim check
 
 signTexts:
   # This is what player have to type on a sign (first or second line) to create a WildTP sign

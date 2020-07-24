@@ -8,9 +8,12 @@ import static net.poweredbyhate.wildtp.WildTP.useOtherChekar;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadLocalRandom;
+
+import io.papermc.lib.PaperLib;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Warning;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -18,6 +21,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import net.poweredbyhate.wildtp.TeleportGoneWild.Direction;
 
+@Deprecated
+@Warning(reason = "Use WhatAreYouDoingInMySwamp") //TODO: refactor name
 class RandomLocationSearchTask implements Callable<Location> {
     private int maxX, maxZ, minX, minZ;
 
@@ -35,12 +40,12 @@ class RandomLocationSearchTask implements Callable<Location> {
         if (disway != null) {
             Location l = player.getLocation();
 
-            switch (disway) { // @formatter:off
+            switch (disway) {
               case EAST:  minX = l.getBlockX(); break;
               case NORTH: maxZ = l.getBlockZ(); break;
               case SOUTH: minZ = l.getBlockZ(); break;
               case WEST:  maxX = l.getBlockX(); break;
-          } // @formatter:on
+          }
         }
 
         FutureTask<Location> futureTask = new FutureTask<Location>((Callable<Location>) this);
@@ -69,22 +74,18 @@ class RandomLocationSearchTask implements Callable<Location> {
             if (!TooCool2Teleport.isCold(player)) throw new Exception("event was cancelled!");
 
             TeleportGoneWild.focus(player, wc, retries);
-            // Con los terroristas...
+            // if movingBorder, then check worldborder (again)
             if (wc.harlemShake) rickRoll();
-            // Come on baby, do the Loco-motion
-            final Location loco, l0c0 = new Location(wc.world, r4nd0m(maxX, minX), 10, r4nd0m(maxZ, minZ));
 
-            if (WildTP.notPaper) wc.world.getChunkAt(l0c0);
-            else wc.world.getChunkAtAsync(l0c0, true).get();
+            final Location[] loco = {null};
+            Location l0c0 = new Location(wc.world, r4nd0m(maxX, minX), 10, r4nd0m(maxZ, minZ));
 
-            loco = Bukkit.getScheduler().callSyncMethod(instace, new Callable<Location>() {
-                @Override
-                public Location call() throws Exception {
-                    return chekar(l0c0);
-                }
-            }).get();
+            if (WildTP.notPaper)
+                wc.world.getChunkAt(l0c0);
+            else
+                wc.world.getChunkAtAsync(l0c0, true).thenAccept(chunk -> loco[0] = chekar(l0c0)).get();
 
-            if (loco != null) return loco;
+            if (loco[0] != null) return loco[0];
         }
 
         TeleportGoneWild.cure(player);
@@ -107,21 +108,20 @@ class RandomLocationSearchTask implements Callable<Location> {
                 (!checkAir || (blockType != Material.AIR && blockType != Material.CAVE_AIR && blockType != Material.VOID_AIR));
     }
 
-    private Location netherLocation(Location l0c0, int max) { // @formatter:off
+    private Location netherLocation(Location l0c0, int max) {
         Block b = l0c0.getBlock(); for (int d = 0; d < max;) if (
             b.getRelative(BlockFace.UP, d++).getType() == Material.AIR
         &&  b.getRelative(BlockFace.UP, d++).getType() == Material.AIR
         && !b.getRelative(BlockFace.UP, d-3).isPassable()) return b.getLocation().add(0, d-3, 0); return null;
-    } // @formatter:on
+    }
 
     private boolean n0tAGreifClam(Location l0c0) {
         if ((useExperimentalChekar || useOtherChekar) && player != null) {
-            try { // @formatter:off
+            try {
                 BlurredBlockBreakEvent iHopePluginsDontFreakOutOverThis
                     = new BlurredBlockBreakEvent(l0c0.getBlock(), new JohnBonifield(player));
                 CodeACertainBallWillStealEvent theQueueBall
                     = new CodeACertainBallWillStealEvent(l0c0.clone().add(0, 1, 0), player);
-                // @formatter:on
                 player.setMetadata("nocheat.exempt", new FixedMetadataValue(instace, true));
 
                 if (useExperimentalChekar)
