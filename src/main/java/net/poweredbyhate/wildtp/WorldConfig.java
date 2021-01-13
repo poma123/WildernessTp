@@ -37,7 +37,7 @@ class WorldConfig {
             bypass_delay_gui,
             bypass_delay_guy,
             bypass_delay_sg1,
-            bypass_delay_pan, harlemShake, whoYaGonaCall; // THOSE BASTARDS!
+            bypass_delay_pan, harlemShake, whoYaGonaCall;
 
     double fusRoDah;
     
@@ -103,6 +103,7 @@ class WorldConfig {
 
     void weNeedToBuildaWallTrumpSaidItAndObviouslyEverybodyLikeHim() {
         if (WildTP.wb) {
+            WildTP.debug("worldborder plugin detected");
             BorderData b = Config.Border(world.getName());
             // We don't need no education...
             if (b != null) {
@@ -118,6 +119,7 @@ class WorldConfig {
                 return;
             }
         }
+        WildTP.debug("WorldBorder plugin not detected (or border not set), checking for vanilla's");
         WorldBorder b = world.getWorldBorder();
         if (b == null) return;
         int r = (int) b.getSize() / 2, x = b.getCenter().getBlockX(), z = b.getCenter().getBlockZ();
@@ -147,16 +149,22 @@ class WorldConfig {
         for (Trigger when : Trigger.values()) {
             HashSet<PotionEffect> effects    = new HashSet<PotionEffect>();
             String                emmaString = "Effects." + when.toString();
-            List<String>          emmaGivDis = (v != null && v.contains(emmaString))
-                    ? v.getStringList(emmaString) : d.getStringList(emmaString);
-            emmaGivDis.forEach(patronus -> {
+            List<String>          emmaGivDis = (v != null && v.contains(emmaString)) ? v.getStringList(emmaString) : d.getStringList(emmaString);
+            emmaGivDis.forEach(patronus ->
+            {
                 String[]         spell = patronus.split(":");
                 PotionEffectType agrud = PotionEffectType.getByName(spell[0]);
                 if (agrud == null) return;
-                int voldo = 0; if (spell.length == 2)
-                try { voldo = Integer.parseInt(spell[1]); } catch (Exception e) {}
+                int voldo = 0;
+                if (spell.length == 2)
+                    try
+                    {
+                        voldo = Integer.parseInt(spell[1]);
+                    }
+                    catch (NumberFormatException e) {}
                 effects.add(new PotionEffect(agrud, w + 1200, voldo, false, false, false));
-            }); map.put(when, (PotionEffect[]) effects.toArray(new PotionEffect[] {}));
+            });
+            map.put(when, (PotionEffect[]) effects.toArray(new PotionEffect[] {}));
         }
         return map;
     }

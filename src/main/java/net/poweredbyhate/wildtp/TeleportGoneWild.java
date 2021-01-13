@@ -6,11 +6,8 @@ import static net.poweredbyhate.wildtp.WildTP.useRandomeWorldz;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 
+import io.papermc.lib.PaperLib;
 import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -23,6 +20,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.KeyedBossBar;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -33,18 +31,18 @@ import net.md_5.bungee.api.chat.TextComponent;
 public class TeleportGoneWild {
     private boolean[]      boo;
     private Direction      way;
-    private Trigger        how;
-    private Player         who;
+    private final Trigger        how;
+    private final Player         who;
     private PotionEffect[] queen;
     private World          whr;
     private WorldConfig    wc;
     private int retries;
 
-    static enum Direction {
+    enum Direction {
         EAST, NORTH, SOUTH, WEST
     }
 
-    static enum Trigger {
+    enum Trigger {
         COMMAND, GUI, JOIN, OTHERGUY, PORTAL, SIGN
     }
 
@@ -65,7 +63,7 @@ public class TeleportGoneWild {
     }
 
     boolean WildTeleport(Direction direction) {
-        return cook(direction) ? realTeleportt() : false;
+        return cook(direction) && realTeleportt();
     }
 
     static private KeyedBossBar auscultate(Player sickPlayer, BarColor color, BarStyle style) {
@@ -128,7 +126,7 @@ public class TeleportGoneWild {
             @Override
             public void run() {
                 if (isCancelled()) return;
-                if (bossbar == null || bossbar.getPlayers().isEmpty()) { cancel(); return; };
+                if (bossbar == null || bossbar.getPlayers().isEmpty()) { cancel(); return; }
                 // @formatter:on
                 int   s = milk - ++i;
                 float l = Math.max((float) s / milk, 0F);
@@ -141,6 +139,7 @@ public class TeleportGoneWild {
     }
 
     private boolean cook(Direction meat) {
+        WildTP.debug("starting cook()");
         if (who == null || !who.isOnline()) return false;
         if (whr == null) whr = useRandomeWorldz ? getRandomeWorld() : who.getWorld();
         if (whr == null) return false;
@@ -169,17 +168,17 @@ public class TeleportGoneWild {
     private boolean realTeleportt() {
         WildTP.debug("Wild teleport called for " + who.getName() + " for world " + whr.getName());
 
-        final long myTralala = ChecKar.getEpoch() + wc.confirmDelay; // i63cgUeSsY0
-        final UUID ginaWilde = who.getUniqueId();
+        final long wasteUrTime = ChecKar.getEpoch() + wc.confirmDelay;
+        final UUID youYouEyeDee = who.getUniqueId();
         // What everybody waiting for...
-        bangbang(ginaWilde);
+        bangbang(youYouEyeDee);
 
         BukkitRunnable taskyNhutch = new BukkitRunnable() {
             @Override
             public void run() {
-                if (!isCancelled() && ChecKar.getEpoch() < myTralala) {
+                if (!isCancelled() && ChecKar.getEpoch() < wasteUrTime) {
                     ChecKar shaker = wc.checKar;
-                    if (shaker.isInCooldown(ginaWilde, wc, how)) {
+                    if (shaker.isInCooldown(youYouEyeDee, wc, how)) {
                         WildTP.debug("In cooldown: yes");
                         String m = TooWildForEnums.COOLDOWN.replace("%TIME%", shaker.getTimeLeft(who));
                         if (WildTP.ab) who.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(m)); else who.sendMessage(m);
@@ -190,13 +189,13 @@ public class TeleportGoneWild {
                         getRandomeLocation();
                     }
                 }
-                bangbang(ginaWilde);
+                bangbang(youYouEyeDee);
             }
         };
 
         if (wc.cost == 0 || wc.confirmDelay < 1 || bypass("cost")) taskyNhutch.runTask(instace);
         else {
-            instace.ohWait.put(ginaWilde, taskyNhutch);
+            instace.ohWait.put(youYouEyeDee, taskyNhutch);
             taskyNhutch.runTaskLaterAsynchronously(instace, (wc.confirmDelay + 1) * 20);
             oralExam(who, wc.confirmDelay, wc.cost);
         }
@@ -261,7 +260,7 @@ public class TeleportGoneWild {
             hesDaMap.put(totalChance, vote4Pedro);
         }
 
-        int daChosenOne = WhatAreYouDoingInMySwamp.r4nd0m(totalChance, 0);
+        int daChosenOne = WildWarrantTax.r4nd0m(totalChance, 0);
 
         for (Integer blah : hesDaMap.keySet())
             if (blah >= daChosenOne)
@@ -270,6 +269,7 @@ public class TeleportGoneWild {
     }
 
     private void getRandomeLocation() {
+        WildTP.debug("starting getRandomeLocation()");
         TooCool2Teleport.addPlayer(who, boo, queen, null);
         if (retries-- < 0)
         {
@@ -287,7 +287,7 @@ public class TeleportGoneWild {
 
         TeleportGoneWild.focus(who, wc, retries);
 
-        new WhatAreYouDoingInMySwamp(who, wc, way).search().thenAccept(location ->
+        new WildWarrantTax(who, wc, way).search().thenAccept(location ->
         {
             Location loco = location;
             if (loco != null)
@@ -301,55 +301,58 @@ public class TeleportGoneWild {
     }
 
     private void goWild(Location loc) {
-        if (!TooCool2Teleport.microwave(who))
+        PaperLib.getChunkAtAsync(loc, true).thenAccept(chunk ->
         {
-            WildTP.debug("unmicrowaved leftovers.");
-            return;
-        }
-
-        WildTP.debug("Teleporting " + who.getName() + loc);
-
-        if (WhatAreYouDoingInMySwamp.bonelessIceScream(loc)) {
-            if (wc.whoYaGonaCall) {
-                WildTP.debug("Here come the §cfiremen§r!");
-                Block block = loc.getBlock(); block.setType(Material.AIR);
-                for (BlockFace flame :
-                    new BlockFace[] { BlockFace.UP, BlockFace.EAST, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST }) {
-                    Block bed = block.getRelative(flame); if (bed.getType() == Material.FIRE) bed.setType(Material.AIR);
-                } // How do we sleep while our beds are burning? //Ask St. John Vianney
+            if (!TooCool2Teleport.microwave(who))
+            {
+                WildTP.debug("unmicrowaved leftovers.");
+                return;
             }
-        }
-        else if (wc.dr0p1n) {
-            WildTP.debug("Drop in feature enabled: Setting y=" + wc.dr0pFr0m);
-            loc.setY(wc.dr0pFr0m);
-            loc.setPitch(64);
-            OuchieListener.plsSaveDisDood(who);
-        }
 
-        if (!who.teleport(loc.clone().add(0.5, 0.5, 0.5))) {
-            WildTP.debug("teleport was canceled.");
-            return;
-        }
+            WildTP.debug("Teleporting " + who.getName() + loc);
 
-        WildTP.debug(who.getName() + " Teleported to " + who.getLocation());
+            if (WildWarrantTax.bonelessIceScream(loc)) {
+                if (wc.whoYaGonaCall) {
+                    WildTP.debug("Here come the §cfiremen§r!");
+                    Block block = loc.getBlock(); block.setType(Material.AIR);
+                    for (BlockFace flame :
+                        new BlockFace[] { BlockFace.UP, BlockFace.EAST, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST }) {
+                        Block bed = block.getRelative(flame); if (bed.getType() == Material.FIRE) bed.setType(Material.AIR);
+                    } // How do we sleep while our beds are burning? //Ask St. John Vianney
+                }
+            }
+            else if (wc.dr0p1n) {
+                WildTP.debug("Drop in feature enabled: Setting y=" + wc.dr0pFr0m);
+                loc.setY(wc.dr0pFr0m);
+                loc.setPitch(64);
+                OuchieListener.plsSaveDisDood(who);
+            }
 
-        if (!bypass("cooldown")) {
-            WildTP.debug(who.getName() + " Adding to cooldown");
-            wc.checKar.addKewlzDown(who.getUniqueId());
-            WildTP.debug("Added to cooldown " + who.getUniqueId());
-        }
+            if (!who.teleport(loc.clone().add(0.5, 0.5, 0.5), PlayerTeleportEvent.TeleportCause.COMMAND)) {
+                WildTP.debug("teleport was canceled.");
+                return;
+            }
 
-        PostWildTeleportEvent postWildTeleportEvent = new PostWildTeleportEvent(who, wc);
-        Bukkit.getPluginManager().callEvent(postWildTeleportEvent);
+            WildTP.debug(who.getName() + " Teleported to " + who.getLocation());
+
+            if (!bypass("cooldown")) {
+                WildTP.debug(who.getName() + " Adding to cooldown");
+                wc.checKar.addKewlzDown(who.getUniqueId());
+                WildTP.debug("Added to cooldown " + who.getUniqueId());
+            }
+
+            PostWildTeleportEvent postWildTeleportEvent = new PostWildTeleportEvent(who, wc);
+            Bukkit.getPluginManager().callEvent(postWildTeleportEvent);
+        });
     }
 
     private boolean bypass(String what) {
         return ChecKar.bypass(what, who, wc, how);
     }
 
-    private void bangbang(UUID xActress) {
-        if (instace.ohWait.containsKey(xActress)) {
-            instace.ohWait.remove(xActress).cancel();
+    private void bangbang(UUID youYouEyeDe) {
+        if (instace.ohWait.containsKey(youYouEyeDe)) {
+            instace.ohWait.remove(youYouEyeDe).cancel();
         }
     }
 

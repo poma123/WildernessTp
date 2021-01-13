@@ -27,7 +27,7 @@ import static net.poweredbyhate.wildtp.WildTP.useOtherChekar;
  * @author RoboMWM
  */
 
-public class WhatAreYouDoingInMySwamp
+public class WildWarrantTax
 {
     private int maxX, maxZ, minX, minZ;
     private Player player;
@@ -35,7 +35,7 @@ public class WhatAreYouDoingInMySwamp
     private Location randomLocation;
     private Callable<Boolean> callable;
 
-    WhatAreYouDoingInMySwamp(Player p, WorldConfig flatEarthProofs, TeleportGoneWild.Direction disway)
+    WildWarrantTax(Player p, WorldConfig flatEarthProofs, TeleportGoneWild.Direction disway)
     {
         this.player = p;
         this.wc = flatEarthProofs;
@@ -63,6 +63,8 @@ public class WhatAreYouDoingInMySwamp
     public CompletableFuture<Location> search()
     {
         Location l0c0 = new Location(wc.world, r4nd0m(maxX, minX), 10, r4nd0m(maxZ, minZ));
+        WildTP.debug("started search with " + l0c0);
+        WildTP.debug("primary thread? " + Bukkit.isPrimaryThread());
 
         return PaperLib.getChunkAtAsync(l0c0, true).thenApply(chunk ->
         {
@@ -79,6 +81,16 @@ public class WhatAreYouDoingInMySwamp
             return false;
         location = location.clone();
         location.setY(127);
+        WildTP.debug("world is a nether environment, checking " + location + " for bedrock (vanilla nether)");
+        return location.getBlock().getType() == Material.BEDROCK;
+    }
+
+    static boolean billyIceScream(Location location) {
+        if (location.getWorld().getEnvironment() != World.Environment.NETHER)
+            return false;
+        location = location.clone();
+        location.setY(255);
+        WildTP.debug("world is a nether environment, checking " + location + " for bedrock (billy's doubleheight nether)");
         return location.getBlock().getType() == Material.BEDROCK;
     }
 
@@ -87,11 +99,26 @@ public class WhatAreYouDoingInMySwamp
     }
 
     private Location chekar(Location loco) {
-        if (wc.bioman.contains(loco.getBlock().getBiome().toString())) return null;
-        if (bonelessIceScream(loco)) loco = netherLocation(loco, 110);
-        else loco.setY(loco.getWorld().getHighestBlockYAt(loco));
-        WildTP.debug("am chekin");
-        WildTP.debug(loco);
+        WildTP.debug("starting chekar with " + loco + " first checking biome blacklist");
+        WildTP.debug("primary thread? " + Bukkit.isPrimaryThread());
+        WildTP.debug("block: " + loco.getBlock());
+        WildTP.debug("biome: " + loco.getBlock().getBiome());
+
+        //https://github.com/AcmeProject/WildernessTp/issues/93#issuecomment-757527909
+        if (loco.getBlock().getBiome() != null && wc.bioman.contains(loco.getBlock().getBiome().toString()))
+            return null;
+
+        WildTP.debug("Biome not banned, now set y (also checks if this is a vanilla (or doubleheight) nether."); //Will need to update for 1.17
+        if (bonelessIceScream(loco))
+            loco = netherLocation(loco, 110);
+        else if (billyIceScream(loco))
+            loco = netherLocation(loco, 250);
+        else
+        {
+            WildTP.debug("world is not vanilla/doubleheight nether, find highest y block with a totally reliable and never constantly changing Bukkit method");
+            loco.setY(loco.getWorld().getHighestBlockYAt(loco));
+        }
+        WildTP.debug("am chekin" + loco);
         if (loco != null
                 && !wc.nonoBlocks.contains(loco.getBlock().getType().name())
                 && n0tAGreifClam(loco))
